@@ -24,7 +24,6 @@ MCM_SETTING(iAskBed, 1)
 MCM_SETTING(iNPCBed, 1)
 MCM_SETTING(iUseFade, 1)
 MCM_SETTING(iClimaxType, 0)
-MCM_SETTING(iFilterStrictness, 2)
 MCM_SETTING(iLipsSoundTime, 1)
 
 MCM_SETTING(iLovenseStrength, 10)
@@ -32,15 +31,15 @@ MCM_SETTING(iLovenseStrengthOrgasm, 20)
 MCM_SETTING(fLovenseDurationOrgasm, 8)
 
 // KeyBinds/Scene Control Related
-MCM_SETTING(iKeyUp, 0x11)				// W
-MCM_SETTING(iKeyDown, 0x1F)			// S
-MCM_SETTING(iKeyLeft, 0x1E)			// A
-MCM_SETTING(iKeyRight, 0x20)		// D
+MCM_SETTING(iKeyUp, 0x11)		// W
+MCM_SETTING(iKeyDown, 0x1F)		// S
+MCM_SETTING(iKeyLeft, 0x1E)		// A
+MCM_SETTING(iKeyRight, 0x20)	// D
 MCM_SETTING(iKeyAdvance, 0x39)	// Space
-MCM_SETTING(iKeyEnd, 0xCF)			// End
-MCM_SETTING(iKeyExtra2, 0x12)		// E
-MCM_SETTING(iKeyMod, 0x2A)			// Shift
-MCM_SETTING(iKeyReset, 0x1D)		// Ctrl
+MCM_SETTING(iKeyEnd, 0xCF)		// End
+MCM_SETTING(iKeyExtra2, 0x12)	// E
+MCM_SETTING(iKeyMod, 0x2A)		// Shift
+MCM_SETTING(iKeyReset, 0x1D)	// Ctrl
 
 MCM_SETTING(iToggleFreeCamera, 81)
 MCM_SETTING(iTargetActor, 49)
@@ -84,3 +83,39 @@ MCM_SETTING(sOptionalTags, ""s)
 
 MCM_SETTING(iStripForms, std::vector<int>({ 1032555423, 1, 1032555423, 1, 806420, 0, 352928413, 1 }))
 MCM_SETTING(fTimers, std::vector<float>({ 10.0f, 15.0f, 25.0f, 7.0f }))
+
+// Enjoyment Related
+
+MCM_SETTING(bInternalEnjoymentEnabled, true)
+MCM_SETTING(iInterDetectionStrength, 3)
+MCM_SETTING(fEnjRaiseMultInter, 0.8f)
+
+MCM_SETTING(iEnjGainOnStageSkip, 15)
+MCM_SETTING(bNoStaminaEndsScene, false)
+MCM_SETTING(bMaleOrgasmEndsScene, false)
+MCM_SETTING(bDomMustOrgasm, true)
+MCM_SETTING(bPlayerMustOrgasm, true)
+MCM_SETTING(bHighEnjOrgasmWait, true)
+MCM_SETTING(iMaxNoPainOrgasmMale, 1)
+MCM_SETTING(iMaxNoPainOrgasmFemale, 2)
+MCM_SETTING(iNoPainRequiredTime, 30)
+MCM_SETTING(iNoPainRequiredXP, 50)
+
+MCM_SETTING(fEnjMultVictim, 0.8f)
+MCM_SETTING(fEnjMultAggressor, 1.2f)
+MCM_SETTING(fEnjMultSub, 0.8f)
+MCM_SETTING(fEnjMultDom, 1.2f)
+MCM_SETTING(fPainHugePPMult, 0.5f)
+
+MCM_SETTING(bGameEnabled, true)
+MCM_SETTING(bGamePlayerAutoplay, false)
+MCM_SETTING(bGamePlayerVictimAutoplay, true)
+MCM_SETTING(bGameNPCAutoplay, true)
+MCM_SETTING(bGameEnjReductionChance, false)
+MCM_SETTING(bGameHoldbackWithPartner, true)
+
+MCM_SETTING(iGameUtilityKey, 42)
+MCM_SETTING(iGamePauseKey, 48)
+MCM_SETTING(iGameRaiseEnjKey, 256)
+MCM_SETTING(iGameHoldbackKey, 257)
+MCM_SETTING(iGameSelectNextPos, 34)
