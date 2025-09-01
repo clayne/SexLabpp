@@ -39,7 +39,7 @@ namespace Registry
 		bool climax;
 		Transform offset;
 		stl::enumeration<StripData> strips;
-		int8_t schlong;
+		std::vector<RE::BSFixedString> tags;
 	};
 
 	struct Stage

@@ -30,11 +30,16 @@ namespace Registry
 		stream.read(hash.data(), Decode::HASH_SIZE);
 
 		uint64_t scene_count;
-		Decode::Read(stream, scene_count);
+		if (version >= 4) {
+			uint32_t size;
+			Decode::Read(stream, size);
+			scene_count = static_cast<uint64_t>(size);
+		} else {
+			Decode::Read(stream, scene_count);
+		}
 		scenes.reserve(scene_count);
 		for (size_t i = 0; i < scene_count; i++) {
-			scenes.push_back(
-				std::make_unique<Scene>(stream, hash, version));
+			scenes.push_back(std::make_unique<Scene>(stream, hash, version));
 		}
 	}
 
@@ -46,7 +51,13 @@ namespace Registry
 		Decode::Read(a_stream, name);
 		// --- Position Infos
 		uint64_t info_count;
-		Decode::Read(a_stream, info_count);
+		if (a_version >= 4) {
+			uint32_t size;
+			Decode::Read(a_stream, size);
+			info_count = static_cast<uint64_t>(size);
+		} else {
+			Decode::Read(a_stream, info_count);
+		}
 		positions.reserve(info_count);
 		for (size_t i = 0; i < info_count; i++) {
 			positions.emplace_back(a_stream, a_version);
@@ -96,7 +107,13 @@ namespace Registry
 		std::string startstage(Decode::ID_SIZE, 'X');
 		a_stream.read(startstage.data(), Decode::ID_SIZE);
 		uint64_t stage_count;
-		Decode::Read(a_stream, stage_count);
+		if (a_version >= 4) {
+			uint32_t size;
+			Decode::Read(a_stream, size);
+			stage_count = static_cast<uint64_t>(size);
+		} else {
+			Decode::Read(a_stream, stage_count);
+		}
 		stages.reserve(stage_count);
 		for (size_t i = 0; i < stage_count; i++) {
 			const auto& stage = stages.emplace_back(
@@ -113,7 +130,13 @@ namespace Registry
 		}
 		// --- Graph
 		uint64_t graph_vertices;
-		Decode::Read(a_stream, graph_vertices);
+		if (a_version >= 4) {
+			uint32_t size;
+			Decode::Read(a_stream, size);
+			graph_vertices = static_cast<uint64_t>(size);
+		} else {
+			Decode::Read(a_stream, graph_vertices);
+		}
 		if (graph_vertices != stage_count) {
 			const auto err = std::format("Invalid graph vertex count; expected {} but got {}", stage_count, graph_vertices);
 			throw std::runtime_error(err.c_str());
@@ -128,7 +151,13 @@ namespace Registry
 			}
 			std::vector<const Stage*> edges{};
 			uint64_t edge_count;
-			Decode::Read(a_stream, edge_count);
+			if (a_version >= 4) {
+				uint32_t size;
+				Decode::Read(a_stream, size);
+				edge_count = static_cast<uint64_t>(size);
+			} else {
+				Decode::Read(a_stream, edge_count);
+			}
 			std::string edgeid(Decode::ID_SIZE, 'X');
 			for (size_t n = 0; n < edge_count; n++) {
 				a_stream.read(edgeid.data(), Decode::ID_SIZE);
@@ -167,7 +196,7 @@ namespace Registry
 
 		data = ActorFragment(sex, race, scale, extra.all(Extra::Vamprie), extra.all(Extra::Submissive), extra.all(Extra::Unconscious));
 
-		if (a_version > 1) {
+		if (a_version > 1 && a_version < 4) {
 			uint64_t extra_custom;
 			Decode::Read(a_stream, extra_custom);
 			annotations.reserve(extra_custom);
@@ -192,14 +221,7 @@ namespace Registry
 		for (size_t i = 0; i < position_count; i++) {
 			positions.emplace_back(a_stream, a_version);
 		}
-		if (a_version >= 4) {
-			uint32_t fixedlength_ms;
-			Decode::Read(a_stream, fixedlength_ms);
-			fixedlength = static_cast<float>(fixedlength_ms) / 1000.0f;
-		} else {
-			Decode::Read(a_stream, fixedlength);
-			fixedlength /= 1000.0f;
-		}
+		Decode::Read(a_stream, fixedlength);
 		Decode::Read(a_stream, navtext);
 		tags = TagData{ a_stream };
 	}
@@ -209,24 +231,31 @@ namespace Registry
 		climax(Decode::Read<uint8_t>(a_stream) > 0),
 		offset(Transform(a_stream)),
 		strips(decltype(strips)::enum_type(Decode::Read<uint8_t>(a_stream))),
-		schlong(a_version >= 3 ? Decode::Read<decltype(schlong)>(a_stream) : 0) {}
+		tags({})
+	{
+		if (a_version == 3) Decode::Read<int8_t>(a_stream);
+		if (a_version >= 4) {
+			uint32_t extra_custom;
+			Decode::Read(a_stream, extra_custom);
+			tags.reserve(extra_custom);
+			for (size_t j = 0; j < extra_custom; j++) {
+				RE::BSFixedString tag;
+				Decode::Read(a_stream, tag);
+				tags.push_back(tag);
+			}
+		}
+	}
 
 	void Position::Save(YAML::Node& a_node) const
 	{
 		auto transform = a_node["transform"];
 		offset.Save(transform);
-		if (schlong != 0) {
-			a_node["schlong"] = static_cast<int32_t>(schlong);
-		}
 	}
 
 	void Position::Load(const YAML::Node& a_node)
 	{
 		if (auto transform = a_node["transform"]; transform.IsDefined()) {
 			offset.Load(transform);
-		}
-		if (auto schlongnode = a_node["schlong"]; schlongnode.IsDefined()) {
-			schlong = static_cast<int8_t>(schlongnode.as<int32_t>());
 		}
 	}
 
@@ -314,9 +343,9 @@ namespace Registry
 #define SET_SEX(s)     \
 	if (sex.all(Sex::s)) \
 		ret.set(PapyrusSex::s);
-		SET_SEX(Male);
-		SET_SEX(Female);
-		SET_SEX(Futa);
+			SET_SEX(Male);
+			SET_SEX(Female);
+			SET_SEX(Futa);
 #undef SET_SEX
 		} else {
 			const auto crtSex = sex.any(Sex::Female) ? PapyrusSex::CrtFemale : PapyrusSex::CrtMale;
@@ -492,7 +521,7 @@ namespace Registry
 			return {};
 
 		const auto N = a_fragments.size();
-		std::vector fragmentGraph(N, std::vector<std::pair<size_t, int32_t>>{});	 // fragment[i] = { { positionIdx, score }, ... }
+		std::vector fragmentGraph(N, std::vector<std::pair<size_t, int32_t>>{});	// fragment[i] = { { positionIdx, score }, ... }
 		for (size_t i = 0; i < N; i++) {
 			const auto& fragment = a_fragments[i];
 			for (size_t j = 0; j < N; j++) {
